@@ -53,6 +53,11 @@ TerminalEmulator::TerminalEmulator(QWidget *parent) : QWidget(parent), outputAre
         dup2(slave_fd, STDOUT_FILENO);
         dup2(slave_fd, STDERR_FILENO);
         ::close(slave_fd); // Close slave after duplication
+        // Set the TERM environment variable
+        if (setenv("TERM", "xterm-256color", 1) == -1) {
+            perror("setenv");
+            exit(1);
+        }
         const char *logMessage = "Slave terminal started successfully.\n";
         write(STDOUT_FILENO, logMessage, strlen(logMessage));
         execlp("/bin/bash", "bash", nullptr);

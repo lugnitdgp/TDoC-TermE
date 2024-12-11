@@ -1301,7 +1301,9 @@ TerminalEmulator.o: ../../TerminalEmulator.cpp ../../TerminalEmulator.h \
 		../../../Qt2/6.8.1/gcc_64/include/QtWidgets/qapplication.h \
 		../../../Qt2/6.8.1/gcc_64/include/QtCore/QTimer \
 		../../../Qt2/6.8.1/gcc_64/include/QtCore/qtimer.h \
-		../../../Qt2/6.8.1/gcc_64/include/QtCore/qbasictimer.h
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qbasictimer.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/QRegularExpression \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qregularexpression.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o TerminalEmulator.o ../../TerminalEmulator.cpp
 
 main.o: ../../main.cpp ../../../Qt2/6.8.1/gcc_64/include/QtWidgets/QApplication \

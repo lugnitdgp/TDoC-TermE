@@ -14,8 +14,8 @@ public:
     explicit TerminalEmulator(QWidget *parent = nullptr);
     ~TerminalEmulator() override;
 
-// protected:
-//     void keyPressEvent(QKeyEvent *event) override;
+    // protected:
+    //     void keyPressEvent(QKeyEvent *event) override;
 
 private slots:
     void readFromMaster();
