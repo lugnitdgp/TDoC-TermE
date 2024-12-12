@@ -40,7 +40,7 @@ DISTNAME      = TerminalEmulatorApp1.0.0
 DISTDIR = /home/devansh/CppTdoc/build/Desktop_Qt_6_8_1-Debug/.tmp/TerminalEmulatorApp1.0.0
 LINK          = g++
 LFLAGS        = -Wl,-rpath,/home/devansh/Qt2/6.8.1/gcc_64/lib -Wl,-rpath-link,/home/devansh/Qt2/6.8.1/gcc_64/lib
-LIBS          = $(SUBLIBS) /home/devansh/Qt2/6.8.1/gcc_64/lib/libQt6Widgets.so /home/devansh/Qt2/6.8.1/gcc_64/lib/libQt6Gui.so /home/devansh/Qt2/6.8.1/gcc_64/lib/libQt6Core.so -lpthread -lGL   
+LIBS          = $(SUBLIBS) -lvterm /home/devansh/Qt2/6.8.1/gcc_64/lib/libQt6Widgets.so /home/devansh/Qt2/6.8.1/gcc_64/lib/libQt6Gui.so /home/devansh/Qt2/6.8.1/gcc_64/lib/libQt6Core.so -lpthread -lGL   
 AR            = ar cqs
 RANLIB        = 
 SED           = sed
@@ -54,10 +54,12 @@ OBJECTS_DIR   = ./
 
 SOURCES       = ../../TerminalEmulator.cpp \
 		../../main.cpp qrc_qmake_qmake_qm_files.cpp \
+		moc_CustomLineEdit.cpp \
 		moc_TerminalEmulator.cpp
 OBJECTS       = TerminalEmulator.o \
 		main.o \
 		qrc_qmake_qmake_qm_files.o \
+		moc_CustomLineEdit.o \
 		moc_TerminalEmulator.o
 DIST          = /Qt2/6.8.1/gcc_64/mkspecs/features/spec_pre.prf \
 		/Qt2/6.8.1/gcc_64/mkspecs/common/unix.conf \
@@ -293,7 +295,8 @@ DIST          = /Qt2/6.8.1/gcc_64/mkspecs/features/spec_pre.prf \
 		/Qt2/6.8.1/gcc_64/mkspecs/features/exceptions.prf \
 		/Qt2/6.8.1/gcc_64/mkspecs/features/yacc.prf \
 		/Qt2/6.8.1/gcc_64/mkspecs/features/lex.prf \
-		../../../../CppTdoc.pro ../../TerminalEmulator.h ../../TerminalEmulator.cpp \
+		../../../../CppTdoc.pro ../../CustomLineEdit.h \
+		../../TerminalEmulator.h ../../TerminalEmulator.cpp \
 		../../main.cpp
 QMAKE_TARGET  = TerminalEmulatorApp
 DESTDIR       = 
@@ -802,7 +805,7 @@ distdir: FORCE
 	$(COPY_FILE) --parents ../../CppTdoc_en_GB.ts $(DISTDIR)/
 	$(COPY_FILE) --parents qmake_qmake_qm_files.qrc $(DISTDIR)/
 	$(COPY_FILE) --parents ../../../Qt2/6.8.1/gcc_64/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents ../../TerminalEmulator.h $(DISTDIR)/
+	$(COPY_FILE) --parents ../../CustomLineEdit.h ../../TerminalEmulator.h $(DISTDIR)/
 	$(COPY_FILE) --parents ../../TerminalEmulator.cpp ../../main.cpp $(DISTDIR)/
 	$(COPY_FILE) --parents ../../mainwindow.ui $(DISTDIR)/
 	$(COPY_FILE) --parents ../../CppTdoc_en_GB.ts $(DISTDIR)/
@@ -848,9 +851,209 @@ compiler_moc_predefs_clean:
 moc_predefs.h: ../../../Qt2/6.8.1/gcc_64/mkspecs/features/data/dummy.cpp
 	g++ -pipe -g -std=gnu++1z -Wall -Wextra -fPIC -dM -E -o moc_predefs.h ../../../Qt2/6.8.1/gcc_64/mkspecs/features/data/dummy.cpp
 
-compiler_moc_header_make_all: moc_TerminalEmulator.cpp
+compiler_moc_header_make_all: moc_CustomLineEdit.cpp moc_TerminalEmulator.cpp
 compiler_moc_header_clean:
-	-$(DEL_FILE) moc_TerminalEmulator.cpp
+	-$(DEL_FILE) moc_CustomLineEdit.cpp moc_TerminalEmulator.cpp
+moc_CustomLineEdit.cpp: ../../CustomLineEdit.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtWidgets/QLineEdit \
+		../../../Qt2/6.8.1/gcc_64/include/QtWidgets/qlineedit.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtWidgets/qtwidgetsglobal.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtGui/qtguiglobal.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qglobal.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qtversionchecks.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qtconfiginclude.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qconfig.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qtcore-config.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qtconfigmacros.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qtdeprecationdefinitions.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qtcoreexports.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qcompilerdetection.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qprocessordetection.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qsystemdetection.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qtdeprecationmarkers.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qtclasshelpermacros.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qtpreprocessorsupport.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qassert.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qtnoop.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qtypes.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qtversion.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qtypeinfo.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qcontainerfwd.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qsysinfo.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qlogging.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qflags.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qcompare_impl.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qatomic.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qbasicatomic.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qatomic_cxx11.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qgenericatomic.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qyieldcpu.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qconstructormacros.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qdarwinhelpers.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qexceptionhandling.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qforeach.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qttypetraits.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qfunctionpointer.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qglobalstatic.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qmalloc.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qminmax.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qnumeric.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qoverload.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qswap.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qtenvironmentvariables.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qtresource.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qttranslation.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qversiontagging.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtGui/qtgui-config.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtGui/qtguiexports.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtWidgets/qtwidgets-config.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtWidgets/qtwidgetsexports.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtWidgets/qframe.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtWidgets/qwidget.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtGui/qwindowdefs.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qobjectdefs.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qnamespace.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qcompare.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qcomparehelpers.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/q20type_traits.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qtmetamacros.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qobjectdefs_impl.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qfunctionaltools_impl.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qobject.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qstring.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qchar.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qstringview.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qbytearray.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qrefcount.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qarraydata.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qpair.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qarraydatapointer.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qarraydataops.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qcontainertools_impl.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qxptype_traits.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/q20functional.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/q20memory.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qbytearrayalgorithms.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qbytearrayview.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qstringfwd.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qstringliteral.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qstringalgorithms.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qlatin1stringview.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qanystringview.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qutf8stringview.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qstringtokenizer.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qstringbuilder.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qstringconverter.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qstringconverter_base.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qlist.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qhashfunctions.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qiterator.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qbytearraylist.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qstringlist.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qalgorithms.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qstringmatcher.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qcoreevent.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qscopedpointer.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qmetatype.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qdatastream.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qiodevicebase.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qfloat16.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qmath.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qiterable.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qmetacontainer.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qcontainerinfo.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qtaggedpointer.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qscopeguard.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qobject_impl.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qbindingstorage.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qmargins.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/q23utility.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtGui/qaction.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtGui/qkeysequence.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtGui/qicon.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qsize.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtGui/qpixmap.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtGui/qpaintdevice.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qrect.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qpoint.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtGui/qcolor.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtGui/qrgb.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtGui/qrgba64.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qshareddata.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtGui/qimage.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtGui/qpixelformat.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtGui/qtransform.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtGui/qpolygon.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtGui/qregion.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qspan.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/q20iterator.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qline.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qvariant.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qdebug.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qtextstream.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qcontiguouscache.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qsharedpointer.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qsharedpointer_impl.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qmap.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qshareddata_impl.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qset.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qhash.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qvarlengtharray.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtGui/qpalette.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtGui/qbrush.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtGui/qfont.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qendian.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtGui/qfontmetrics.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtGui/qfontinfo.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtWidgets/qsizepolicy.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtGui/qcursor.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtGui/qbitmap.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtGui/qevent.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qiodevice.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qurl.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtGui/qeventpoint.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtGui/qvector2d.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtGui/qvectornd.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtGui/qpointingdevice.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtGui/qinputdevice.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtGui/qscreen.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/QList \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/QObject \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/QRect \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/QSize \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/QSizeF \
+		../../../Qt2/6.8.1/gcc_64/include/QtGui/QTransform \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qnativeinterface.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtGui/qscreen_platform.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtGui/qguiapplication.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qcoreapplication.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qdeadlinetimer.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qelapsedtimer.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qeventloop.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qcoreapplication_platform.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qfuture.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qfutureinterface.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qmutex.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qtsan_impl.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qresultstore.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qfuture_impl.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qthreadpool.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qthread.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qrunnable.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qexception.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qpromise.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtGui/qinputmethod.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qlocale.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtGui/qguiapplication_platform.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtGui/qtextcursor.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtGui/qtextdocument.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtGui/qtextformat.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtGui/qpen.h \
+		../../../Qt2/6.8.1/gcc_64/include/QtGui/qtextoption.h \
+		moc_predefs.h \
+		../../../Qt2/6.8.1/gcc_64/libexec/moc
+	/home/devansh/Qt2/6.8.1/gcc_64/libexec/moc $(DEFINES) --include /home/devansh/CppTdoc/build/Desktop_Qt_6_8_1-Debug/moc_predefs.h -I/home/devansh/Qt2/6.8.1/gcc_64/mkspecs/linux-g++ -I/home/devansh/CppTdoc -I/home/devansh/Qt2/6.8.1/gcc_64/include -I/home/devansh/Qt2/6.8.1/gcc_64/include/QtWidgets -I/home/devansh/Qt2/6.8.1/gcc_64/include/QtGui -I/home/devansh/Qt2/6.8.1/gcc_64/include/QtCore -I. -I/usr/include/c++/11 -I/usr/include/x86_64-linux-gnu/c++/11 -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-linux-gnu/11/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include ../../CustomLineEdit.h -o moc_CustomLineEdit.cpp
+
 moc_TerminalEmulator.cpp: ../../TerminalEmulator.h \
 		../../../Qt2/6.8.1/gcc_64/include/QtWidgets/QWidget \
 		../../../Qt2/6.8.1/gcc_64/include/QtWidgets/qwidget.h \
@@ -1301,9 +1504,7 @@ TerminalEmulator.o: ../../TerminalEmulator.cpp ../../TerminalEmulator.h \
 		../../../Qt2/6.8.1/gcc_64/include/QtWidgets/qapplication.h \
 		../../../Qt2/6.8.1/gcc_64/include/QtCore/QTimer \
 		../../../Qt2/6.8.1/gcc_64/include/QtCore/qtimer.h \
-		../../../Qt2/6.8.1/gcc_64/include/QtCore/qbasictimer.h \
-		../../../Qt2/6.8.1/gcc_64/include/QtCore/QRegularExpression \
-		../../../Qt2/6.8.1/gcc_64/include/QtCore/qregularexpression.h
+		../../../Qt2/6.8.1/gcc_64/include/QtCore/qbasictimer.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o TerminalEmulator.o ../../TerminalEmulator.cpp
 
 main.o: ../../main.cpp ../../../Qt2/6.8.1/gcc_64/include/QtWidgets/QApplication \
@@ -1520,6 +1721,9 @@ main.o: ../../main.cpp ../../../Qt2/6.8.1/gcc_64/include/QtWidgets/QApplication 
 
 qrc_qmake_qmake_qm_files.o: qrc_qmake_qmake_qm_files.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o qrc_qmake_qmake_qm_files.o qrc_qmake_qmake_qm_files.cpp
+
+moc_CustomLineEdit.o: moc_CustomLineEdit.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_CustomLineEdit.o moc_CustomLineEdit.cpp
 
 moc_TerminalEmulator.o: moc_TerminalEmulator.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_TerminalEmulator.o moc_TerminalEmulator.cpp

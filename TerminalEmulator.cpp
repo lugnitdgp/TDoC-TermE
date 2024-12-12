@@ -10,11 +10,13 @@
 #include <unistd.h>
 #include <termios.h>
 #include <sys/ioctl.h>
+#include <signal.h>
 #include <poll.h>
 #include <iostream>
 #include <cstdlib>
 
-TerminalEmulator::TerminalEmulator(QWidget *parent) : QWidget(parent), outputArea(nullptr), inputArea(nullptr), master_fd(-1), slave_fd(-1), readNotifier(nullptr) {
+
+TerminalEmulator::TerminalEmulator(QWidget *parent) : QWidget(parent), outputArea(nullptr), inputArea(nullptr), master_fd(-1), slave_fd(-1), readNotifier(nullptr),childPid(-1) {
     // Setup the UI
     outputArea = new QPlainTextEdit(this);
     //inputArea = new QLineEdit(this);
@@ -28,6 +30,7 @@ TerminalEmulator::TerminalEmulator(QWidget *parent) : QWidget(parent), outputAre
     layout->addWidget(inputArea);
 
     setLayout(layout);
+    inputArea->installEventFilter(this);
 
     // Setup pseudo-terminal
     if (openpty(&master_fd, &slave_fd, nullptr, nullptr, nullptr) == -1) {
@@ -44,7 +47,13 @@ TerminalEmulator::TerminalEmulator(QWidget *parent) : QWidget(parent), outputAre
 
     if (pid == 0) { // Child process
         ::close(master_fd); // Close master in child process
+
         setsid();
+
+        // if (setpgid(0, 0) == -1) { // Set process group ID to the same as the child
+        //     perror("setpgid");
+        //     exit(1);
+        // }
         if (ioctl(slave_fd, TIOCSCTTY, 0) == -1) {
             perror("ioctl");
             exit(1);
@@ -64,6 +73,7 @@ TerminalEmulator::TerminalEmulator(QWidget *parent) : QWidget(parent), outputAre
         perror("execlp");
         exit(1);
     } else { // Parent process
+        childPid = pid;
         ::close(slave_fd); // Close slave in parent process
 
         // Monitor master_fd for output
@@ -80,6 +90,9 @@ TerminalEmulator::TerminalEmulator(QWidget *parent) : QWidget(parent), outputAre
 
 TerminalEmulator::~TerminalEmulator() {
     ::close(master_fd); // Explicitly close the master file descriptor
+    if (childPid > 0) {
+        kill(childPid, SIGKILL); // Kill child process if it is still running
+    }
 }
 
 void TerminalEmulator::readFromMaster() {
@@ -109,15 +122,6 @@ void TerminalEmulator::readFromMaster() {
         perror("read");
     }
 }
-// void TerminalEmulator::keyPressEvent(QKeyEvent *event) {
-//     if (event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter) {
-//         // Send input when Enter is pressed
-//         sendInput();
-//     } else {
-//         // Process other keys normallly
-//         QWidget::keyPressEvent(event);
-//     }
-// }
 
 
 
@@ -131,4 +135,23 @@ void TerminalEmulator::sendInput() {
         qDebug() << "Bytes written:" << bytesWritten;
     }
     inputArea->clear();
+}
+
+bool TerminalEmulator::eventFilter(QObject *obj, QEvent *event) {
+    if (obj == inputArea && event->type() == QEvent::KeyPress) {
+        QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+        if (keyEvent->modifiers() == Qt::ControlModifier && keyEvent->key() == Qt::Key_C) {
+            handleCtrlC();
+            return true; // Do not process further
+        }
+    }
+    return QWidget::eventFilter(obj, event);
+}
+
+void TerminalEmulator::handleCtrlC() {
+    if (childPid > 0) {
+        if (kill(-childPid, SIGINT) == -1) {
+            perror("kill failed");
+        }
+    }
 }

@@ -15,8 +15,11 @@ SOURCES += \
 TARGET = TerminalEmulatorApp
 TEMPLATE = app
 
+LIBS += -lvterm
+
 
 HEADERS += \
+    CustomLineEdit.h \
     TerminalEmulator.h
 
 
