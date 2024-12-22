@@ -1,12 +1,13 @@
-// TerminalEmulator.h
-
 #ifndef TERMINALEMULATOR_H
 #define TERMINALEMULATOR_H
 
-#include <QWidget> // Base class for the UI elements
-#include <QPlainTextEdit> //multi-line text display. Used here to show terminal output.
-#include <QLineEdit> //single-line text input. Used for capturing user input.
-#include <QSocketNotifier> //Monitors file descriptors for events
+#include <QWidget>
+#include <QPlainTextEdit>
+#include <QLineEdit>
+#include <QSocketNotifier>
+#include <QPushButton>
+#include <QMenu>
+#include <QAction>
 
 /**
  * @file TerminalEmulator.h
@@ -17,7 +18,7 @@
  * to the shell, handling Ctrl+C, and managing ANSI escape sequences.
  */
 class TerminalEmulator : public QWidget {
-    Q_OBJECT // a macro for signal slot mechanism
+    Q_OBJECT // Macro for the signal-slot mechanism
 public:
     explicit TerminalEmulator(QWidget *parent = nullptr); // Constructor to set up UI and PTY
     ~TerminalEmulator() override; // Destructor to clean up resources
@@ -28,6 +29,8 @@ protected:
 private slots:
     void readFromMaster(); // Reads shell output from the master PTY
     void sendInput(); // Sends user input to the shell
+    void changeBackgroundColor(); // Slot to change background color
+    void changeTextColor(); // Slot to change text color
 
 private:
     void handleCtrlC(); // Handles Ctrl+C to send SIGINT to the shell process

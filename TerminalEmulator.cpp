@@ -1,36 +1,58 @@
 // TerminalEmulator.cpp
 #include "TerminalEmulator.h"
 
-#include <QVBoxLayout> //Provides vertical layout management.
-#include <QApplication> //The base class for Qt GUI applications.
+#include <QVBoxLayout>
+#include <QApplication>
 #include <QTimer>
-#include <QSocketNotifier> //Monitors file descriptors for I/O operations.
-#include <QRegularExpression> //Used for pattern matching
-#include <pty.h> //Manages pseudo-terminal devices.
-#include <unistd.h> //Provides system-level I/O operations.
-#include <termios.h> //Configures terminal attributes.
-#include <sys/ioctl.h> //Handles signals like SIGINT.
-#include <signal.h> //Manages terminal I/O control.
-#include <poll.h> // Handles polling file descriptors.
-#include <iostream> //For C++ standard input and output.
-#include <cstdlib> //Provides general utilities like exit.
-
+#include <QSocketNotifier>
+#include <QRegularExpression>
+#include <pty.h>
+#include <unistd.h>
+#include <termios.h>
+#include <sys/ioctl.h>
+#include <signal.h>
+#include <poll.h>
+#include <iostream>
+#include <cstdlib>
+#include <QPushButton>
+#include <QMenu>
+#include <QAction>
+#include <QFont>
 
 // Definition of TerminalEmulator Constructor
-TerminalEmulator::TerminalEmulator(QWidget *parent) : QWidget(parent), outputArea(nullptr), inputArea(nullptr), master_fd(-1), slave_fd(-1), readNotifier(nullptr),childPid(-1) {
-     // Setup the UI with a vertical box layout containing an output area and input area
-    outputArea = new QPlainTextEdit(this); //we pass this which is the parent of outputArea
+TerminalEmulator::TerminalEmulator(QWidget *parent) : QWidget(parent), outputArea(nullptr), inputArea(nullptr), master_fd(-1), slave_fd(-1), readNotifier(nullptr), childPid(-1) {
+    // Setup the UI with a vertical box layout containing an output area, input area, and buttons
+    outputArea = new QPlainTextEdit(this);
     inputArea = new QLineEdit(this);
-    inputArea->setFocus(); // Will shift the focus to the input area when the Application opens
-    outputArea->setReadOnly(true); // Sets the Output Area to readonly mode
+    inputArea->setFocus();
+    outputArea->setReadOnly(true);
 
-    QVBoxLayout *layout = new QVBoxLayout(this); // Creates an instance of QVBoxLayout which contains the input and output area
+    // Set the text in outputArea to bold
+    QFont font = outputArea->font();
+    font.setBold(true);
+    outputArea->setFont(font);
+
+    // Change the background color of inputArea
+    QPalette inputPalette = inputArea->palette();
+    inputPalette.setColor(QPalette::Base, Qt::lightGray);
+    inputArea->setPalette(inputPalette);
+
+    QVBoxLayout *layout = new QVBoxLayout(this);
     layout->addWidget(outputArea);
     layout->addWidget(inputArea);
 
-    setLayout(layout); // Sets The Application layout in a vertical manner
-    inputArea->installEventFilter(this); //Installs an event filter on the `inputArea` to capture and handle specific events.
+    // Create buttons for changing background and text color
+    QPushButton *backgroundColorButton = new QPushButton("Change Background Colour", this);
+    QPushButton *textColorButton = new QPushButton("Change Text Colour", this);
+    layout->addWidget(backgroundColorButton);
+    layout->addWidget(textColorButton);
 
+    setLayout(layout);
+    inputArea->installEventFilter(this);
+
+    // Connect the buttons' clicked signals to the slots
+    connect(backgroundColorButton, &QPushButton::clicked, this, &TerminalEmulator::changeBackgroundColor);
+    connect(textColorButton, &QPushButton::clicked, this, &TerminalEmulator::changeTextColor);
 
     // Setup pseudo-terminal
     if (openpty(&master_fd, &slave_fd, nullptr, nullptr, nullptr) == -1) {
@@ -38,7 +60,7 @@ TerminalEmulator::TerminalEmulator(QWidget *parent) : QWidget(parent), outputAre
         exit(1);
     }
 
-    // Fork the child process - Creates a duplicate process
+    // Fork the child process
     pid_t pid = fork();
     if (pid == -1) {
         perror("fork");
@@ -46,25 +68,23 @@ TerminalEmulator::TerminalEmulator(QWidget *parent) : QWidget(parent), outputAre
     }
 
     if (pid == 0) { // Child process
-        ::close(master_fd); // Close master in child process
+        ::close(master_fd);
 
-        setsid(); // Create a new session to detach the child process from the terminal
+        setsid();
 
-        if (ioctl(slave_fd, TIOCSCTTY, 0) == -1) { // Making the Slave side the controlling terminal
+        if (ioctl(slave_fd, TIOCSCTTY, 0) == -1) {
             perror("ioctl");
             exit(1);
         }
-        dup2(slave_fd, STDIN_FILENO); // Redirect standard input to the slave PTY
-        dup2(slave_fd, STDOUT_FILENO); // Redirect standard output to the slave PTY
-        dup2(slave_fd, STDERR_FILENO); // Redirect standard error to the slave PTY
-        ::close(slave_fd); // Close slave after duplication
+        dup2(slave_fd, STDIN_FILENO);
+        dup2(slave_fd, STDOUT_FILENO);
+        dup2(slave_fd, STDERR_FILENO);
+        ::close(slave_fd);
 
-        // Set the TERM environment variable to 'xterm-256color' to enable 256-color support
         if (setenv("TERM", "xterm-256color", 1) == -1) {
             perror("setenv");
             exit(1);
         }
-        // Retrieve the user's default shell from the SHELL environment variable
         const char *shell = getenv("SHELL");
         if (!shell) {
             perror("getenv");
@@ -72,99 +92,76 @@ TerminalEmulator::TerminalEmulator(QWidget *parent) : QWidget(parent), outputAre
         }
         const char *logMessage = "Slave terminal started successfully.\n";
         write(STDOUT_FILENO, logMessage, strlen(logMessage));
-        execlp(shell, shell, nullptr); // Execute the retrieved shell
+        execlp(shell, shell, nullptr);
         perror("execlp");
         exit(1);
     } else { // Parent process
-        childPid = pid; // Store the child process ID for later use
-        ::close(slave_fd); // Close slave in parent process
+        childPid = pid;
+        ::close(slave_fd);
 
-        // Monitor master_fd for output
         readNotifier = new QSocketNotifier(master_fd, QSocketNotifier::Read, this);
         connect(readNotifier, &QSocketNotifier::activated, this, &TerminalEmulator::readFromMaster);
 
-        // Handle user input
         connect(inputArea, &QLineEdit::returnPressed, this, &TerminalEmulator::sendInput);
-
     }
-
 }
 
 TerminalEmulator::~TerminalEmulator() {
-    ::close(master_fd); // Explicitly close the master file descriptor
+    ::close(master_fd);
     if (childPid > 0) {
-        kill(childPid, SIGKILL); // Kill child process if it is still running
+        kill(childPid, SIGKILL);
     }
 }
 
 void TerminalEmulator::readFromMaster() {
-    // Buffer to hold data read from the master PTY
     char buffer[256];
-
-    // Read data from the master PTY into the buffer
     ssize_t count = read(master_fd, buffer, sizeof(buffer) - 1);
 
     if (count > 0) {
-        buffer[count] = '\0'; // Null-terminate the buffer to make it a valid C-string
-
-        // Convert the buffer to a QString
+        buffer[count] = '\0';
         QString output = QString::fromLocal8Bit(buffer);
 
-        // Handle ANSI escape sequences for clearing the terminal screen
         if (output.contains("\033[H\033[2J")) {
-            outputArea->clear(); // Clear the terminal output
-            output.remove(QRegularExpression("\033\\[H\\033\\[2J")); // Remove the sequence
+            outputArea->clear();
+            output.remove(QRegularExpression("\033\\[H\\033\\[2J"));
         }
 
-        // Remove ANSI escape sequences for styling and control characters
-        output.remove(QRegularExpression("\x1B\\[[0-9;]*[a-zA-Z]")); // CSI sequences
-        output.remove(QRegularExpression("\x1B\\][^\\x07]*\\x07"));  // OSC sequences
-        output.remove(QRegularExpression("\x1B\\[\\?2004[h|l]"));    // Bracketed paste mode sequences
-        output.remove(QRegularExpression("\x1B\\(B"));               // Character set sequence
-        output.remove(QRegularExpression("\x1B\\]0;[^\\x07]*\\x07"));// Title setting sequences
-        output.remove(QRegularExpression("[\x00-\x1F\x7F]"));           // Remove other non-printable control characters
+        output.remove(QRegularExpression("\x1B\\[[0-9;]*[a-zA-Z]"));
+        output.remove(QRegularExpression("\x1B\\][^\\x07]*\\x07"));
+        output.remove(QRegularExpression("\x1B\\[\\?2004[h|l]"));
+        output.remove(QRegularExpression("\x1B\\(B"));
+        output.remove(QRegularExpression("\x1B\\]0;[^\\x07]*\\x07"));
+        output.remove(QRegularExpression("[\x00-\x1F\x7F]"));
 
-        // Append the cleaned output to the output area for display
         outputArea->appendPlainText(output);
-    } else if (count == 0) { // EOF
-        readNotifier->setEnabled(false); // Disable the read notifier on EOF
-    } else { // Error
-        perror("read"); // Print an error message if reading fails
+    } else if (count == 0) {
+        readNotifier->setEnabled(false);
+    } else {
+        perror("read");
     }
 }
 
-
-
 void TerminalEmulator::sendInput() {
-    // Retrieve the user input from the input area, append a newline character
     QString input = inputArea->text() + "\n";
-
-    // Debugging output to display the input being sent
     qDebug() << "Sending input to master_fd:" << input;
 
-    // Write the input to the master PTY
     ssize_t bytesWritten = write(master_fd, input.toLocal8Bit().constData(), input.size());
 
-    // Check if the write operation was successful
     if (bytesWritten == -1) {
-        // Error handling: Print an error message if the write operation failed
         perror("write failed");
     } else {
-        // Debugging output: Show the number of bytes written to the master PTY
         qDebug() << "Bytes written:" << bytesWritten;
     }
 
-    // Clear the input area after sending the input
     inputArea->clear();
 }
-
 
 bool TerminalEmulator::eventFilter(QObject *obj, QEvent *event) {
     if (obj == inputArea && event->type() == QEvent::KeyPress) {
         QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
         if (keyEvent->modifiers() == Qt::ControlModifier && keyEvent->key() == Qt::Key_C) {
             handleCtrlC();
-            return true; // Do not process further
+            return true;
         }
     }
     return QWidget::eventFilter(obj, event);
@@ -175,5 +172,99 @@ void TerminalEmulator::handleCtrlC() {
         if (kill(-childPid, SIGINT) == -1) {
             perror("kill failed");
         }
+    }
+}
+
+// Slot to handle background colour change
+void TerminalEmulator::changeBackgroundColor() {
+    QMenu colorMenu;
+    QAction *blackAction = colorMenu.addAction("Black");
+    QAction *whiteAction = colorMenu.addAction("White");
+    QAction *redAction = colorMenu.addAction("Red");
+    QAction *greenAction = colorMenu.addAction("Green");
+    QAction *blueAction = colorMenu.addAction("Blue");
+    QAction *yellowAction=colorMenu.addAction("Yellow");
+     QAction *magentaAction = colorMenu.addAction("Magenta");
+      QAction *cyanAction = colorMenu.addAction("Cyan");
+
+    QAction *selectedAction = colorMenu.exec(QCursor::pos());
+    if (selectedAction) {
+        QColor color;
+        if (selectedAction == blackAction) {
+            color = Qt::black;
+        } else if (selectedAction == whiteAction) {
+            color = Qt::white;
+        } else if (selectedAction == redAction) {
+            color = Qt::red;
+        } else if (selectedAction == greenAction) {
+            color = Qt::green;
+        } else if (selectedAction == blueAction) {
+            color = Qt::blue;
+        }
+        else if (selectedAction == yellowAction)
+        {
+            color=Qt::yellow;
+        }
+        else if (selectedAction ==magentaAction) {
+            color = Qt::magenta;
+        }
+        else if (selectedAction == cyanAction) {
+            color = Qt::cyan;
+        }
+
+        QPalette outputPalette = outputArea->palette();
+        outputPalette.setColor(QPalette::Base, color);
+        outputArea->setPalette(outputPalette);
+
+        QPalette inputPalette = inputArea->palette();
+        inputPalette.setColor(QPalette::Base, color);
+        inputArea->setPalette(inputPalette);
+    }
+}
+
+// Slot to handle text colour change
+void TerminalEmulator::changeTextColor() {
+    QMenu colorMenu;
+    QAction *blackAction = colorMenu.addAction("Black");
+    QAction *whiteAction = colorMenu.addAction("White");
+    QAction *redAction = colorMenu.addAction("Red");
+    QAction *greenAction = colorMenu.addAction("Green");
+    QAction *blueAction = colorMenu.addAction("Blue");
+    QAction *yellowAction=colorMenu.addAction("Yellow");
+    QAction *magentaAction = colorMenu.addAction("Magenta");
+    QAction *cyanAction = colorMenu.addAction("Cyan");
+
+    QAction *selectedAction = colorMenu.exec(QCursor::pos());
+    if (selectedAction) {
+        QColor color;
+        if (selectedAction == blackAction) {
+            color = Qt::black;
+        } else if (selectedAction == whiteAction) {
+            color = Qt::white;
+        } else if (selectedAction == redAction) {
+            color = Qt::red;
+        } else if (selectedAction == greenAction) {
+            color = Qt::green;
+        } else if (selectedAction == blueAction) {
+            color = Qt::blue;
+        }
+        else if (selectedAction == yellowAction)
+        {
+            color=Qt::yellow;
+        }
+        else if (selectedAction ==magentaAction) {
+            color = Qt::magenta;
+        }
+        else if (selectedAction == cyanAction) {
+            color = Qt::cyan;
+        }
+
+        QPalette outputPalette = outputArea->palette();
+        outputPalette.setColor(QPalette::Text, color);
+        outputArea->setPalette(outputPalette);
+
+        QPalette inputPalette = inputArea->palette();
+        inputPalette.setColor(QPalette::Text, color);
+        inputArea->setPalette(inputPalette);
     }
 }
